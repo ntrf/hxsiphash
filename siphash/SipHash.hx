@@ -13,6 +13,11 @@ class SipHash
 	var v3 : Int64;
 	
 	var mode128 : Bool = false;
+	
+	var stash : Int64 = 0;
+	var stash_size : Int = 0;
+	
+	var full_length = 0;
 
 	public function reset(k : haxe.io.Int32Array, mode128 : Bool = false)
 	{
@@ -24,7 +29,7 @@ class SipHash
 		this.mode128 = mode128;
 		
 		if (mode128) {
-			v2 ^= 0x
+			v1 ^= 0xee;
 		}
 	}
 
@@ -69,7 +74,7 @@ class SipHash
 		swap32(v2);
 	}
 
-	static function getInt(a : haxe.io.Bytes, offset : Int) {
+	static inline function getInt(a : haxe.io.Bytes, offset : Int) {
 #if 0
 		return a.get(offset + 3) << 24 |
 			   a.get(offset + 2) << 16 |
@@ -82,6 +87,10 @@ class SipHash
 
 	public function update(k : haxe.io.Bytes) {
 		var i = 0;
+		
+		// todo:
+		// if (stash_size > 0) {
+		// }
 
 		while (i <= k.length - 8) {
 			var pi = Int64.make(getInt(k, i + 4), getInt(k, i + 0));
@@ -89,18 +98,46 @@ class SipHash
 
 			v3 ^= pi;
 
-			var ci = v3.copy();
-
 			round();
 			round();
 
 			v0 ^= pi;
 		}
+		
+		// save for later
+		if (i < k.length) {
+			var s = 8;
+			
+			stash_size = k.length - i;
+			stash = k.get(i); i += 1;
+			
+			while (i < k.length) {
+				stash = k.get(i) << s; s += 8; i += 1;
+			}
+		}
+		
+		full_length += k.length;
 	}
 
-	public function final() : Int64 {
-		v2 ^= 0xff;
+	public function complete() : Int64 {
+		// need to append length
+		stash |= (full_length) << 56;
+	
+		// and run last rounds
+		v3 ^= stash;
 
+		round();
+		round();
+
+		v0 ^= stash;
+		
+	
+		if (!mode128) {
+			v2 ^= 0xff;
+		} else {
+			v2 ^= 0xee;
+		}
+		
 		round();
 		round();
 		round();
@@ -111,4 +148,5 @@ class SipHash
 		v0 ^= v2;
 		return v0;
 	}
+	
 }
