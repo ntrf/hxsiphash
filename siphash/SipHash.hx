@@ -112,7 +112,7 @@ class SipHash
 			stash = k.get(i); i += 1;
 			
 			while (i < k.length) {
-				stash = k.get(i) << s; s += 8; i += 1;
+				stash |= Int64.make(0,k.get(i)) << s; s += 8; i += 1;
 			}
 		}
 		
@@ -121,7 +121,7 @@ class SipHash
 
 	public function complete() : Int64 {
 		// need to append length
-		stash |= (full_length) << 56;
+		stash |= Int64.make(0,full_length) << 56;
 	
 		// and run last rounds
 		v3 ^= stash;
