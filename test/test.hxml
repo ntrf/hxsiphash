@@ -1,0 +1,22 @@
+-cpp build-test-cpp
+-main TestMain
+-cp ..
+
+--next
+
+-neko build-test-neko.n
+-main TestMain
+-cp ..
+
+--next
+
+-js build-test-js.js
+-main TestMain
+-cp ..
+
+--next
+
+-java build-test-java
+-main TestMain
+-cp ..
+
