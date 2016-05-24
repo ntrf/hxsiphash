@@ -31,6 +31,10 @@ class SipHash
 		if (mode128) {
 			v1 ^= 0xee;
 		}
+
+		full_length = 0;
+		stash = 0;
+		stash_shift = 0;
 	}
 
 	public function new() { }
