@@ -35,6 +35,8 @@ class SipHash
 		full_length = 0;
 		stash = 0;
 		stash_shift = 0;
+
+		return this;
 	}
 
 	public function new() { }
@@ -133,6 +135,8 @@ class SipHash
 		}
 
 		full_length += end - start;
+
+		return this;
 	}
 
 	private inline function end() {

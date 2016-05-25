@@ -163,12 +163,10 @@ class SipHashFastTest extends haxe.unit.TestCase {
 	public function testFastInterface() {
 		var state = new SipHash();
 
-		state.reset(key);
-
 		var data = haxe.io.Bytes.alloc(15);
 		for (i in 0 ... 15) data.set(i, i);
 
-		var res = state.fast(data);
+		var res = state.reset(key).fast(data);
 
 		assertEquals(res.high, 0xa129ca61);
 		assertEquals(res.low,  0x49be45e5);
