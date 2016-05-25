@@ -148,11 +148,39 @@ class SipHashStreamTest extends haxe.unit.TestCase {
 	}
 }
 
+class SipHashFastTest extends haxe.unit.TestCase {
+	var key : haxe.io.Int32Array = new haxe.io.Int32Array(4);
+
+	public function new() {
+		super();
+
+		key[0] = 0x03020100;
+		key[1] = 0x07060504;
+		key[2] = 0x0b0a0908;
+		key[3] = 0x0f0e0d0c;
+	}
+
+	public function testFastInterface() {
+		var state = new SipHash();
+
+		state.reset(key);
+
+		var data = haxe.io.Bytes.alloc(15);
+		for (i in 0 ... 15) data.set(i, i);
+
+		var res = state.fast(data);
+
+		assertEquals(res.high, 0xa129ca61);
+		assertEquals(res.low,  0x49be45e5);
+	}
+}
+
 class TestMain {
 	static function main() {
 		var r = new haxe.unit.TestRunner();
 		r.add(new SipHashReferenceTest());
 		r.add(new SipHashStreamTest());
+		r.add(new SipHashFastTest());
 		r.run();
 	}
 }

@@ -135,6 +135,19 @@ class SipHash
 		full_length += end - start;
 	}
 
+	private inline function end() {
+		if (!mode128) {
+			v2 ^= 0xff;
+		} else {
+			v2 ^= 0xee;
+		}
+
+		round();
+		round();
+		round();
+		round();
+	}
+
 	public function complete() : Int64 {
 		// need to append length
 		stash |= Int64.make(0,full_length) << 56;
@@ -147,21 +160,71 @@ class SipHash
 
 		v0 ^= stash;
 
-
-		if (!mode128) {
-			v2 ^= 0xff;
-		} else {
-			v2 ^= 0xee;
-		}
-
-		round();
-		round();
-		round();
-		round();
+		end();
 
 		v0 ^= v1;
 		v2 ^= v3;
 		v0 ^= v2;
+		return v0;
+	}
+
+	public function fast(buf : haxe.io.Bytes, pos : Int = 0, ? len : Int) : Int64 {
+
+		if (len == null) len = buf.length - pos;
+
+		var i = pos;
+
+		while (i <= len - 8) {
+			var pi = Int64.make(getInt(buf, i + 4), getInt(buf, i + 0));
+			i += 8;
+
+			v3 ^= pi;
+
+			round();
+			round();
+
+			v0 ^= pi;
+		}
+
+		var last = Int64.make(len << 24, 0);
+		var rem = len - i;
+
+		if (rem >= 4) {
+			last |= Int64.make(0, buf.getInt32(i));
+			switch(rem) {
+				case 7:
+					last |= Int64.make(buf.getUInt16(i+4) | (buf.get(i+6) << 16), 0);
+				case 6:
+					last |= Int64.make(buf.getUInt16(i+4), 0);
+				case 5:
+					last |= Int64.make(buf.get(i), 0);
+				default:
+			}
+		} else {
+			switch(rem) {
+				case 3:
+					last |= Int64.make(0, buf.getUInt16(i) | (buf.get(i+2) << 16));
+				case 2:
+					last |= Int64.make(0, buf.getUInt16(i));
+				case 1:
+					last |= Int64.make(0, buf.get(i));
+				default:
+			}
+		}
+
+		v3 ^= last;
+
+		round();
+		round();
+
+		v0 ^= last;
+
+		end();
+
+		v0 ^= v1;
+		v2 ^= v3;
+		v0 ^= v2;
+
 		return v0;
 	}
 
