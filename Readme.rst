@@ -47,7 +47,7 @@ Class reference
 ================
 
 class ``siphash.SipHash``
-~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 ``public function reset(k : haxe.io.Int32Array, mode128 : Bool = false)``
     Resets internal state and initializes it with provided key. Allows more than one plaintext to
