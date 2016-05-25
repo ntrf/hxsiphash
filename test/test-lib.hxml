@@ -1,0 +1,3 @@
+-cpp build-test-lib
+-lib siphash
+-main TestMain
