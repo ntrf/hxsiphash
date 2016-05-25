@@ -5,7 +5,6 @@
 	"tags" : ["crypto", "cross"],
 	"description" : "Implementation of SipHash-2-4 - fast and simple message authentication code.",
 	"version" : "0.1.0",
-	"classPath" : "src/",
 	"releasenote" : "Initial release.",
 	"contributors": [ "ntrf" ],
 	"dependencies": {}
